@@ -1,5 +1,5 @@
 ---
-- name: Setup Tomcat8 & Deploy Artifact
+- name: Deploy Artifact
   hosts: appsrvgrp
   vars:
     timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}"
@@ -56,8 +56,9 @@
           block:
             - name: Deploy vprofile artifact
               copy:
-                src: files/ROOT.war
+                src: "/tmp/vproapp-{{vprofile_version}}"
                 dest: /usr/local/tomcat8/webapps/ROOT.war
+                remote_src: yes
               register: deploy_info
               tags:
                 - deploy
