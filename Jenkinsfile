@@ -122,7 +122,7 @@ pipeline {
                         environmentName: "${AWS_EB_ENVIRONMENT}",
                         bucketName: "${AWS_S3_BUCKET}",
                         rootObject: "target",
-                        includes: "${ARTIFACT_NAME}",
+                        includes: "vprofile-v2.war",
                         credentialId: "ebsDeployment",
                         versionLabelFormat: "${AWS_EB_APP_VERSION}", 
                         versionDescriptionFormat: ""
