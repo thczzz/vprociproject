@@ -119,7 +119,7 @@ pipeline {
                         zeroDowntime: false,
                         awsRegion: "us-east-1",
                         applicationName: "${AWS_EB_APP_NAME}",
-                        environmentName: "${env.BEANSTALK_ENV_NAME}",
+                        environmentName: "${AWS_EB_ENVIRONMENT}",
                         bucketName: "${AWS_S3_BUCKET}",
                         rootObject: "target",
                         includes: "${ARTIFACT_NAME}",
