@@ -1,0 +1,77 @@
+---
+- name: Setup Tomcat8 & Deploy Artifact
+  hosts: appsrvgrp
+  vars:
+    timestamp: "{{ ansible_date_time.date }}_{{ ansible_date_time.hour }}_{{ ansible_date_time.minute }}"
+    tom_url: https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.37/bin/apache-tomcat-8.5.37.tar.gz
+  tasks:
+    - name: Install JDK on Ubuntu 18/20
+      apt:
+        name: openjdk-8-jdk
+        state: present
+        update_cache: yes
+
+    - name: Download Tomcat Tar Ball/Binaries
+      get_url:
+        url: "{{ tom_url }}"
+        dest: /tmp/tomcat-8.tar.gz
+    
+    - name: Add tomcat group
+      group:
+        name: tomcat
+        state: present
+    
+    - name: Add tomcat user
+      user:
+        name: tomcat
+        group: tomcat
+        shell: /bin/nologin
+        home: /usr/local/tomcat8
+
+    - file:
+        path: /tmp/tomcat8
+        state: directory
+
+    - name: Extract tomcat
+      unarchive:
+        src: /tmp/tomcat-8.tar.gz
+        dest: /tmp/tomcat8/
+        remote_src: yes
+        list_files: yes
+      register: unarchive_info
+
+    - debug:
+        msg: "{{ unarchive_info.files[0].split('/')[0] }}"
+
+    - name: Sync /tmp/tomcat8/tomcat_cont /usr/local/tomcat8
+      synchronize:
+        src: "/tmp/tomcat8/{{ unarchive_info.files[0].split('/')[0] }}/"
+        dest: /usr/local/tomcat8/
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Change ownership of /usr/local/tomcat8
+      file:
+        path: /usr/local/tomcat8
+        owner: tomcat
+        group: tomcat
+        recurse: yes
+
+    - name: Deploy tomcat.service
+      template:
+        src: templates/tomcat_service.j2
+        dest: /etc/systemd/system/tomcat.service
+      tags:
+        - conf
+      register: template_deploy
+
+    - name: Reload daemon
+      command: "systemctl daemon-reload"
+      when: template_deploy.changed
+
+    - name: Start & Enable tomcat svc
+      service:
+        name: tomcat
+        state: started
+        enabled: yes
+      tags:
+        - svc
