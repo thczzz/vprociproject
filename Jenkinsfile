@@ -103,33 +103,35 @@ pipeline {
             }
         }
 
-        // stage('Deploy to AWS Beanstalk Staging env'){
-        //     withAWS(credentials: 'beancreds', region: 'us-east-1') {
-        //         sh 'aws s3 cp ./target/vprofile-v2.war s3://$AWS_S3_BUCKET/$ARTIFACT_NAME'
-        //         sh 'aws elasticbeanstalk create-application-version --application-name $AWS_EB_APP_NAME --version-label $AWS_EB_APP_VERSION --source-bundle S3Bucket=$AWS_S3_BUCKET,S3Key=$ARTIFACT_NAME'
-        //         sh 'aws elasticbeanstalk update-environment --application-name $AWS_EB_APP_NAME --environment-name $AWS_EB_ENVIRONMENT --version-label $AWS_EB_APP_VERSION'
-        //     }
-        // }
-
-        stage('Deploy to BeanStalk') {
-            steps {
-                step(
-                    [
-                        $class: "AWSEBDeploymentBuilder", 
-                        zeroDowntime: false,
-                        awsRegion: "us-east-1",
-                        applicationName: "${AWS_EB_APP_NAME}",
-                        environmentName: "${AWS_EB_ENVIRONMENT}",
-                        bucketName: "${AWS_S3_BUCKET}",
-                        rootObject: "target",
-                        includes: "vprofile-v2.war",
-                        credentialId: "ebsDeployment",
-                        versionLabelFormat: "${AWS_EB_APP_VERSION}", 
-                        versionDescriptionFormat: ""
-                    ]
-                )
-            } 
+        stage('Deploy to AWS Beanstalk Staging env'){
+            withAWS(credentials: 'beancreds', region: 'us-east-1') {
+                sh 'aws s3 cp ./target/vprofile-v2.war s3://$AWS_S3_BUCKET/$ARTIFACT_NAME'
+                sh 'aws elasticbeanstalk create-application-version --application-name $AWS_EB_APP_NAME --version-label $AWS_EB_APP_VERSION --source-bundle S3Bucket=$AWS_S3_BUCKET,S3Key=$ARTIFACT_NAME'
+                sh 'aws elasticbeanstalk update-environment --application-name $AWS_EB_APP_NAME --environment-name $AWS_EB_ENVIRONMENT --version-label $AWS_EB_APP_VERSION'
+            }
         }
+
+    //     stage('TODO: need to deploy the file as ROOT.war'){}
+
+        // stage('Deploy to BeanStalk') {
+        //     steps {
+        //         step(
+        //             [
+        //                 $class: "AWSEBDeploymentBuilder", 
+        //                 zeroDowntime: false,
+        //                 awsRegion: "us-east-1",
+        //                 applicationName: "${AWS_EB_APP_NAME}",
+        //                 environmentName: "${AWS_EB_ENVIRONMENT}",
+        //                 bucketName: "${AWS_S3_BUCKET}",
+        //                 rootObject: "target",
+        //                 includes: "vprofile-v2.war",
+        //                 credentialId: "ebsDeployment",
+        //                 versionLabelFormat: "${AWS_EB_APP_VERSION}", 
+        //                 versionDescriptionFormat: ""
+        //             ]
+        //         )
+        //     } 
+        // }
     }
 
     post{
