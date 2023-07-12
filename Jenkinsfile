@@ -17,7 +17,7 @@ pipeline {
     }
 
     stages {
-        stage('Deploy to AWS Beanstalk Staging env'){
+        stage('Deploy to AWS Beanstalk Prod env'){
             steps {
                 withAWS(credentials: 'ebsDeployment', region: 'us-east-1') {
                     sh 'aws elasticbeanstalk update-environment --application-name $AWS_EB_APP_NAME --environment-name $AWS_EB_ENVIRONMENT --version-label $AWS_EB_APP_VERSION'
